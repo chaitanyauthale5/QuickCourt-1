@@ -129,7 +129,13 @@ export const Venues = () => {
           {filteredVenues.map((venue) => (
             <Card key={venue.id} className="card-gradient hover-lift border-border/50 overflow-hidden">
               <div className="h-48 bg-muted/50 flex items-center justify-center relative">
-                <span className="text-muted-foreground">Venue Image</span>
+                <img
+                  src="https://content.jdmagicbox.com/v2/comp/bangalore/w5/080pxx80.xx80.220520212956.p3w5/catalogue/yuve-champions-academy-for-badminton-thanisandra-bangalore-sports-clubs-2408ryievv.jpg"
+                  alt={venue.name}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black/20" />
                 {!venue.available && (
                   <div className="absolute top-2 right-2">
                     <Badge variant="destructive">Fully Booked</Badge>

@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
-  const [pendingUser, setPendingUser] = useState<User | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
     // Check for stored user session
@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (data: SignupData): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/auth/signup`, {
+      const res = await fetch(`${API_URL}/api/auth/signup/request-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -101,26 +101,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         })
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        toast.error(err?.error || 'Signup failed');
+        const err = await res.json().catch(() => ({} as any));
+        let msg = typeof err?.error === 'string' ? err.error : 'Signup failed';
+        // Try to surface Zod issues, if present
+        const issues = (err as any)?.issues;
+        if (issues && typeof issues === 'object') {
+          const fieldErrors = (issues as any).fieldErrors || {};
+          const formErrors = (issues as any).formErrors || [];
+          const firstField = Object.keys(fieldErrors)[0];
+          const firstFieldMsg = firstField && Array.isArray(fieldErrors[firstField]) ? fieldErrors[firstField][0] : undefined;
+          const firstFormMsg = Array.isArray(formErrors) ? formErrors[0] : undefined;
+          msg = firstFieldMsg || firstFormMsg || msg;
+        }
+        toast.error(msg);
         return false;
       }
-      const resp = await res.json();
-      const mapped: User = {
-        id: resp.user._id,
-        email: resp.user.email,
-        name: resp.user.name,
-        role: resp.user.role,
-        isVerified: !!resp.user.isVerified,
-        avatar: resp.user.avatar,
-      };
-      setUser(mapped);
-      localStorage.setItem('quickcourt_user', JSON.stringify(mapped));
-      if (resp.token) localStorage.setItem('quickcourt_token', resp.token);
-      // No OTP in backend now
-      setPendingVerification(false);
-      setPendingUser(null);
-      toast.success('Signup successful!');
+      // Expect { message: 'OTP sent...' }
+      setPendingVerification(true);
+      setPendingEmail(data.email);
+      toast.success('OTP sent to your email');
       return true;
     } catch (e) {
       console.error(e);
@@ -132,8 +131,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const verifyOTP = async (otp: string): Promise<boolean> => {
-    // No OTP flow on backend; keep API shape compatible
-    return true;
+    if (!pendingEmail) {
+      toast.error('No signup in progress');
+      return false;
+    }
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/auth/signup/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: pendingEmail, otp })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const msg = typeof err?.error === 'string' ? err.error : 'OTP verification failed';
+        toast.error(msg);
+        return false;
+      }
+      const data = await res.json();
+      const mapped: User = {
+        id: data.user._id,
+        email: data.user.email,
+        name: data.user.name,
+        role: data.user.role,
+        isVerified: !!data.user.isVerified,
+        avatar: data.user.avatar,
+      };
+      setUser(mapped);
+      localStorage.setItem('quickcourt_user', JSON.stringify(mapped));
+      if (data.token) localStorage.setItem('quickcourt_token', data.token);
+      setPendingVerification(false);
+      setPendingEmail(null);
+      toast.success('Signup verified!');
+      return true;
+    } catch (e) {
+      console.error(e);
+      toast.error('OTP verification failed');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
