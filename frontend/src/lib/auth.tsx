@@ -32,30 +32,8 @@ interface SignupData {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Demo users data
-const DEMO_USERS: User[] = [
-  {
-    id: '1',
-    email: 'user@quickcourt.com',
-    name: 'John Doe',
-    role: 'user',
-    isVerified: true,
-  },
-  {
-    id: '2',
-    email: 'owner@quickcourt.com',
-    name: 'Sarah Johnson',
-    role: 'facility_owner',
-    isVerified: true,
-  },
-  {
-    id: '3',
-    email: 'admin@quickcourt.com',
-    name: 'Mike Admin',
-    role: 'admin',
-    isVerified: true,
-  },
-];
+// Base API URL
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -66,85 +44,102 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Check for stored user session
     const storedUser = localStorage.getItem('quickcourt_user');
+    const storedToken = localStorage.getItem('quickcourt_token');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    // Optionally, we could validate token by calling /me here.
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const foundUser = DEMO_USERS.find(u => u.email === email);
-    
-    if (foundUser && password === 'password123') {
-      setUser(foundUser);
-      localStorage.setItem('quickcourt_user', JSON.stringify(foundUser));
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err?.error || 'Login failed');
+        return false;
+      }
+      const data = await res.json();
+      const mapped: User = {
+        id: data.user._id,
+        email: data.user.email,
+        name: data.user.name,
+        role: data.user.role,
+        isVerified: !!data.user.isVerified,
+        avatar: data.user.avatar,
+      };
+      setUser(mapped);
+      localStorage.setItem('quickcourt_user', JSON.stringify(mapped));
+      if (data.token) localStorage.setItem('quickcourt_token', data.token);
       toast.success('Login successful!');
-      setIsLoading(false);
       return true;
-    } else {
-      toast.error('Invalid credentials. Try password123');
-      setIsLoading(false);
+    } catch (e) {
+      console.error(e);
+      toast.error('Login failed');
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signup = async (data: SignupData): Promise<boolean> => {
     setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if user already exists
-    const existingUser = DEMO_USERS.find(u => u.email === data.email);
-    if (existingUser) {
-      toast.error('User already exists');
-      setIsLoading(false);
+    try {
+      const res = await fetch(`${API_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          role: data.role,
+        })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err?.error || 'Signup failed');
+        return false;
+      }
+      const resp = await res.json();
+      const mapped: User = {
+        id: resp.user._id,
+        email: resp.user.email,
+        name: resp.user.name,
+        role: resp.user.role,
+        isVerified: !!resp.user.isVerified,
+        avatar: resp.user.avatar,
+      };
+      setUser(mapped);
+      localStorage.setItem('quickcourt_user', JSON.stringify(mapped));
+      if (resp.token) localStorage.setItem('quickcourt_token', resp.token);
+      // No OTP in backend now
+      setPendingVerification(false);
+      setPendingUser(null);
+      toast.success('Signup successful!');
+      return true;
+    } catch (e) {
+      console.error(e);
+      toast.error('Signup failed');
       return false;
+    } finally {
+      setIsLoading(false);
     }
-
-    // Create new user (unverified)
-    const newUser: User = {
-      id: Date.now().toString(),
-      ...data,
-      isVerified: false,
-    };
-
-    setPendingUser(newUser);
-    setPendingVerification(true);
-    setIsLoading(false);
-    toast.success('Please verify your email with OTP');
-    return true;
   };
 
   const verifyOTP = async (otp: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (otp === '123456' && pendingUser) {
-      const verifiedUser = { ...pendingUser, isVerified: true };
-      setUser(verifiedUser);
-      localStorage.setItem('quickcourt_user', JSON.stringify(verifiedUser));
-      setPendingVerification(false);
-      setPendingUser(null);
-      toast.success('Account verified successfully!');
-      setIsLoading(false);
-      return true;
-    } else {
-      toast.error('Invalid OTP. Use 123456');
-      setIsLoading(false);
-      return false;
-    }
+    // No OTP flow on backend; keep API shape compatible
+    return true;
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('quickcourt_user');
+    localStorage.removeItem('quickcourt_token');
     toast.success('Logged out successfully');
   };
 

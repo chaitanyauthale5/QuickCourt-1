@@ -1,0 +1,12 @@
+import { Router } from 'express';
+import venuesRouter from './venues';
+import bookingsRouter from './bookings';
+import authRouter from './auth';
+
+const router = Router();
+
+router.use('/venues', venuesRouter);
+router.use('/bookings', bookingsRouter);
+router.use('/auth', authRouter);
+
+export default router;

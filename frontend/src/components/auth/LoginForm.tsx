@@ -32,12 +32,8 @@ export const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 grid grid-cols-3 gap-2">
-          <Button type="button" variant="secondary" size="sm" onClick={() => { setEmail('user@quickcourt.com'); setPassword('password123'); login('user@quickcourt.com', 'password123'); }}>User</Button>
-          <Button type="button" variant="secondary" size="sm" onClick={() => { setEmail('owner@quickcourt.com'); setPassword('password123'); login('owner@quickcourt.com', 'password123'); }}>Facility</Button>
-          <Button type="button" variant="secondary" size="sm" onClick={() => { setEmail('admin@quickcourt.com'); setPassword('password123'); login('admin@quickcourt.com', 'password123'); }}>Admin</Button>
-        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
+
           <div className="space-y-2">
             <Label htmlFor="email" className="text-foreground font-medium">
               Email
@@ -55,7 +51,7 @@ export const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="password" className="text-foreground font-medium">
               Password
@@ -96,9 +92,6 @@ export const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
           </Button>
 
           <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Demo credentials: Any email with password123
-            </p>
             <p className="text-sm text-muted-foreground">
               Don't have an account?{' '}
               <button
