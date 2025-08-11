@@ -79,5 +79,6 @@ router.get('/me', requireAuth, async (req: AuthedRequest, res) => {
     return res.status(500).json({ error: 'Failed to load profile' });
   }
 });
-
+//4
 export default router;
+
