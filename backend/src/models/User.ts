@@ -6,7 +6,9 @@ const userSchema = new Schema({
   role: { type: String, enum: ['user', 'facility_owner', 'admin'], default: 'user', required: true },
   avatar: { type: String },
   isVerified: { type: Boolean, default: false },
-  passwordHash: { type: String, required: true }
+  passwordHash: { type: String, required: true },
+  otpCode: { type: String },
+  otpExpiresAt: { type: Date }
 }, { timestamps: true });
 
 export type User = InferSchemaType<typeof userSchema> & { _id: string };
