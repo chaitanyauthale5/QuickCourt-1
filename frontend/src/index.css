@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* QuickCourt Design System - Sports booking platform with gaming/tech aesthetic */
+
+@layer base {
+  :root {
+    /* Dark theme base colors */
+    --background: 222 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 220 13% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 220 13% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Neon accent system */
+    --primary: 320 91% 65%; /* Bright pink/magenta */
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 147 91% 65%; /* Bright green */
+    --secondary-foreground: 220 13% 8%;
+
+    --accent: 271 91% 65%; /* Bright purple */
+    --accent-foreground: 210 40% 98%;
+
+    --warning: 43 91% 65%; /* Bright yellow */
+    --warning-foreground: 220 13% 8%;
+
+    --info: 194 91% 65%; /* Bright cyan */
+    --info-foreground: 220 13% 8%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 320 91% 65%;
+
+    --radius: 0.75rem;
+
+    /* Gradient system */
+    --gradient-primary: linear-gradient(135deg, hsl(320 91% 65%), hsl(271 91% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(147 91% 65%), hsl(194 91% 65%));
+    --gradient-background: linear-gradient(180deg, hsl(222 84% 4.9%), hsl(220 13% 8%));
+    --gradient-card: linear-gradient(145deg, hsl(217.2 32.6% 17.5% / 0.8), hsl(220 13% 8% / 0.9));
+
+    /* Shadows with neon glow */
+    --shadow-neon: 0 0 20px hsl(320 91% 65% / 0.3);
+    --shadow-card: 0 8px 32px hsl(222 84% 4.9% / 0.5);
+    --shadow-elevated: 0 16px 64px hsl(222 84% 4.9% / 0.7);
+
+    /* Animation variables */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background: var(--gradient-background);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-card;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* Neon glow effect */
+  .neon-glow {
+    box-shadow: var(--shadow-neon);
+  }
+
+  /* Card with gradient background */
+  .card-gradient {
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Text gradients */
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-secondary {
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Hover animations */
+  .hover-lift {
+    transition: var(--transition-smooth);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Button animations */
+  .btn-bounce {
+    transition: var(--transition-bounce);
+  }
+
+  .btn-bounce:active {
+    transform: scale(0.95);
+  }
+}

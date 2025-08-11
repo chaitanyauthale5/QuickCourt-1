@@ -1,0 +1,14 @@
+﻿node_modules/
+dist/
+build/
+.out/
+.next/
+.env
+.env.*
+npm-debug.log*
+yarn-*.log*
+pnpm-*.log*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
